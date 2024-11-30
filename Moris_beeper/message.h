@@ -5,36 +5,54 @@ class Message {
 public:
   Message(){}
   Message(unsigned char* inFrom, unsigned char* inTo, unsigned short inPayload, unsigned char inLength)
-    :*from(*inFrom), *to(*inTo), payload(inPayload), length(inLength){
+    :from(inFrom), to(inTo), payload(inPayload), length(inLength){
 
     
       
     }
 
   Message(unsigned char* inFrom, unsigned inChar* to, char const* inMessage)
-    :*from(*inFrom), *to(*inTo), *message(*inMessage){
+    :from(inFrom), to(inTo), message(inMessage){
 
-    length = sizeOf(message);
+    length = strlen(message);
     
   }
 
-  void setLength(unsigned char length){}
+  void setLength(unsigned char inLength){
+    length = inLength;
+  }
 
-  void setTo(unsigned char* to){}
+  void setTo(unsigned char* inTo){
+    to = inTo;
+  }
 
-  void setFrom(unsigned char* from){}
+  void setFrom(unsigned char* inFrom){
+    from = inFrom;
+  }
 
-  void setPayload(unsigned short payload){}
+  void setPayload(unsigned short inPayload){
+    payload = inPayload;
+  }
 
-  unsigned char getLength(){}
+  unsigned char getLength(){
+    return length;
+  }
 
-  unsigned char* getTo(){}
+  unsigned char* getTo(){
+    return to;
+  }
 
-  unsigned char* getFrom(){}
+  unsigned char* getFrom(){
+    return from;
+  }
 
-  unsigned short getPayload(){}
+  unsigned short getPayload(){
+    return payload;
+  }
 
-  char* getPayloadString(){}
+  char* getPayloadString(){
+    //------------------------------------------------------------------------------
+  }
 
 protected:
   unsigned short stringToPayload(char const* message){}
