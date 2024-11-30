@@ -1,1 +1,1 @@
-W will need to discribe the project here once we have progressed.
+We will need to describe the project here once we have progressed.
