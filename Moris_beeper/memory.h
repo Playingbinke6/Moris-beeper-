@@ -29,8 +29,8 @@ public:
   void saveMessage(Message message);
   void saveNodeInformation(Contact contact);
     // Add as you see fit
-  uint8_t read(unsigned short address);
-  void write(unsigned short address, byte value);
+  uint8_t readMemory(unsigned short address);
+  void writeMemory(unsigned short address, uint8_t value);
     
 protected:
   bool hasSchema();
@@ -62,7 +62,7 @@ private:
 unsigned char* Memory::getMyUUID(){//return the UUID of myself
   unsigned char* UUID;
   for(int i=0; i<5; i++){//40 bit UUID => 5 bytes => 5 indexes in the memory
-      UUID[i] = read(3 + i);//UUID starts at the 3rd index in the memory
+      UUID[i] = readMemory(3 + i);//UUID starts at the 3rd index in the memory
   }
   return UUID;
 }
@@ -70,7 +70,7 @@ unsigned char* Memory::getMyUUID(){//return the UUID of myself
 char* Memory::getMyName(){//return the name of myself
   char* name;
   for(int i=0; i<10; i++){//name is of length 10
-      name[i] = read(8 + i);//8+i to get the bytes behind the UUID(first 5)
+      name[i] = readMemory(8 + i);//8+i to get the bytes behind the UUID(first 5)
   }
   return name;
 }
@@ -82,7 +82,7 @@ unsigned char* Memory::getNodeUUID(uint8_t index){//return the UUID of a contact
     return UUID;
 
   for(int i=0; i<5; i++){//adds the chars at the indexes to the char*
-      UUID[i] = read(index*15+ 21 + i);//21 offset to bring it to the list
+      UUID[i] = readMemory(index*15+ 21 + i);//21 offset to bring it to the list
   }
   return UUID;
 }
@@ -94,20 +94,20 @@ char* Memory::getNodeName(uint8_t index){//return the name of contact at index
     return name;
 
   for(int i=0; i<10; i++){//adds the chars at the indexes to the char*
-      name[i] = read(index*15+ 26 + i);//same index as the UUID read but with +5 bytes to skip the UUID of the contact
+      name[i] = readMemory(index*15+ 26 + i);//same index as the UUID read but with +5 bytes to skip the UUID of the contact
   }
   return name;
 }
 
 unsigned short Memory::getNumberContacts(){//return the number of contacts
-  read(20);//index for the number of contacts
+  readMemory(20);//index for the number of contacts
 }
 
 unsigned short Memory::getNumberMessages(){//return the number of messages
-  read(173);//index for the number of messages
+  readMemory(173);//index for the number of messages
 }
 
-Contact Memory::getContact(unsigned short index){//return the contact at the corisponding index = = = = = = = = = = = = = = = = =
+Contact Memory::getContact(unsigned short index){//return the contact at the corisponding index (0 - 9)= = = = = = = = = = = = = = = = =
   //contacts are stored UUID then Name in their address
   unsigned char* UUID;
   const char* NAME;
@@ -119,12 +119,12 @@ Message Memory::getMessage(unsigned short index){//return the message obj at the
 }
 
 bool Memory::saveContact(Contact contact){// save a new contact if there is sapce avalable
-  int index = read(20);
+  int index = readMemory(20);
   if(index >= 10)//if the list of contcacts is full return false
     return false;
 
-  write(index*15+ 21, contact.getUUID());//write the UUID
-  write(index*15+ 26, contact.getName());//write the name
+  writeMemory(index*15+ 21, contact.getUUID());//write the UUID
+  writeMemory(index*15+ 26, contact.getName());//write the name
 }
 
 void Memory::saveMessage(Message message){
@@ -137,11 +137,11 @@ void Memory::saveNodeInformation(Contact contact){
   //this might update the linked list of contacts for the new contact? = = = = = = = = = 
 }
 
-uint8_t read(unsigned short address){
+uint8_t readMemory(unsigned short address){
   //read from the memory byte you have to check and make sure that nothing is writing when you try to read
 }
 
-void write(unsigned short address, uint8_t value){
+void writeMemory(unsigned short address, uint8_t value){
   //write a value to the memory but you also have to make sure that nothing else is writing at that time
 }
 
@@ -155,12 +155,12 @@ bool Memory::hasSchema(){// return true if schema is set up right
   }
 
   // check second flag (018 - 019 => 0xFACE)
-  else if(read(18) != (0xFA) || read(19) != (0xCE)){// if second flag DNE
+  else if(readMemory(18) != (0xFA) || readMemory(19) != (0xCE)){// if second flag DNE
     failed++;
   }
 
   // check thrid flag (171 - 172 => 0xCA11)
-  else if(read(171) != (0xCa) || read(172) != (0x11)){// if third flag DNE
+  else if(readMemory(171) != (0xCa) || readMemory(172) != (0x11)){// if third flag DNE
     failed++;
   }
   
@@ -175,40 +175,40 @@ bool Memory::hasSchema(){// return true if schema is set up right
 
 void Memory::setSchema(){//store the Schema in the memory
   //set 0xC0FFEE flag (000 - 002)
-  write(0, 0xC0);
-  write(1, 0xFF);
-  write(2, 0xEE);
+  writeMemory(0, 0xC0);
+  writeMemory(1, 0xFF);
+  writeMemory(2, 0xEE);
 
   //set 0xFACE flag (018 - 019)
-  write(18, 0xFA);
-  write(19, 0xCE);
+  writeMemory(18, 0xFA);
+  writeMemory(19, 0xCE);
 
   //set 0xCA11 flag (171 - 172)
-  write(171, 0xCA);
-  write(172, 0x11);
+  writeMemory(171, 0xCA);
+  writeMemory(172, 0x11);
 
   //clear messages and contacts
   clearMessages();
   clearContacts();
 
   //set offset value
-  write(434, OFFSET);
+  writeMemory(434, OFFSET);
 }
 
 void Memory::clearMessages(){//clear all of the messages from memory (174 - 433)
   for(int i=174; i<=433; i++){
-    write(i, 0);
+    writeMemory(i, 0);
   }
 }
 
 void Memory::clearContacts(){//clear all of the contacts from memory (021 - 170)
   for(int i=21; i<=170; i++){
-    write(i, 0);
+    writeMemory(i, 0);
   }
 }
 
 unsigned short Memory::getMessagePointerOffset(){//get the offset for the pointers in messages?
-  return read(434);
+  return readMemory(434);
 }
 
 #endif
