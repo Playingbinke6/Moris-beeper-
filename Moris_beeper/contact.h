@@ -1,7 +1,9 @@
-#infdef contact_h
+#ifndef contact_h
 #define contact_h
 
-class Contact {
+#include "memory.h"
+
+class Contact : public Memory {
   public:
     // Default constructor
     Contact() {
@@ -84,3 +86,4 @@ class Contact {
     char name[MAX_NAME_LENGTH + 1];         // Array to store name (plus null terminator)
 };
 
+#endif

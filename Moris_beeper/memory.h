@@ -107,10 +107,10 @@ unsigned short Memory::getNumberMessages(){//return the number of messages
   readMemory(173);//index for the number of messages
 }
 
-Contact Memory::getContact(unsigned short index){//return the contact at the corisponding index (0 - 9)= = = = = = = = = = = = = = = = =
-  //contacts are stored UUID then Name in their address
-  unsigned char* UUID;
-  const char* NAME;
+Contact Memory::getContact(unsigned short index){//return the contact at the corisponding index (0 - 9)
+  //contacts are stored UUID(5 bytes) then Name(10 bytes) in their address
+  unsigned char* UUID = getNodeUUID(index);
+  const char* NAME = getNodeName(index);
   return Contact(UUID, NAME);
 }
 
@@ -118,19 +118,36 @@ Message Memory::getMessage(unsigned short index){//return the message obj at the
 
 }
 
-bool Memory::saveContact(Contact contact){// save a new contact if there is sapce avalable
+bool Memory::saveContact(Contact contact){// save a new contact if there is sapce avalable = = = = = = = =
   int index = readMemory(20);
+  writeMemory(20, index+1);
+
   if(index >= 10)//if the list of contcacts is full return false
     return false;
 
-  writeMemory(index*15+ 21, contact.getUUID());//write the UUID
-  writeMemory(index*15+ 26, contact.getName());//write the name
+  unsigned char* uuid = contact.retrieveUUID();
+  const char* name = contact.retrieveName();
+
+  for(int i=0; i<5; i++){//write the UUID
+    writeMemory(index*15+ 21, uint8_t(uuid[i]));
+  }
+
+  for(int i=0; i<10; i++){//write the NAME
+    writeMemory(index*15+ 26, uint8_t(name[i]));// each char in char array is one byte,
+  }//so index through each char and cast to byte, then write that byte
 }
 
-void Memory::saveMessage(Message message){
-  //save the message 
-  //might need to add another input for the place to save
-  //will just overwrite prev message if there is one
+void Memory::saveMessage(Message message){//save a message to the next avalable index, loop if more than 20 messages
+  
+  
+  //save the from var
+  unsigned char* from = message.getFrom();
+  //save the to var
+  unsigned char* to = message.getTo();
+  //save payload
+  uint16_t payload = message.getPayload();
+  //save payload length
+  uint8_t length = message.getLength();
 }
 
 void Memory::saveNodeInformation(Contact contact){
@@ -150,7 +167,7 @@ void writeMemory(unsigned short address, uint8_t value){
 bool Memory::hasSchema(){// return true if schema is set up right
   unsigned short failed = 0;
   //check the first flag (000 - 002 => 0xC0FFEE)
-  if(read(0) != (0xC0) || read(1) != (0xFF) || read(2) != (0xEE)){// if first flag DNE
+  if(readMemory(0) != (0xC0) || readMemory(1) != (0xFF) || readMemory(2) != (0xEE)){// if first flag DNE
     failed++;
   }
 
@@ -166,7 +183,7 @@ bool Memory::hasSchema(){// return true if schema is set up right
   
 
   //Serial.print(failed);
-  //Serial.println(" FAILED CASES")
+  //Serial.println(" FAILED CASES ")
   if(failed == 0)// all of the test cases passed for schema
     return true;
   return false;// else false
