@@ -44,11 +44,9 @@ private:
 
       for (unsigned short i, i < this->length, i++){
         
-        
+        this->*(message + i) = payloadToChar(this->payload, this->length);
         
       }
-      this->*(message + i) = payloadToChar(this->payload, this->length);
-      
     }
 
   Message::Message(unsigned char* inFrom, unsigned char* inTo, char* inMessage)
