@@ -54,7 +54,7 @@ private:
   Message::Message(unsigned char* inFrom, unsigned char* inTo, char* inMessage)
     :from(inFrom), to(inTo), message(inMessage){
 
-    this->length = static_cast<unsigned char>(strlen(this->message));
+    this->length = static_cast<unsigned char>(sizeof(this->message));
     
     this->payload = stringToPayload(this->message);
     
