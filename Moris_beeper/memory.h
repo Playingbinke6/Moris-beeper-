@@ -154,12 +154,39 @@ void Memory::saveNodeInformation(Contact contact){
   //this might update the linked list of contacts for the new contact? = = = = = = = = = 
 }
 
-uint8_t readMemory(unsigned short address){
-  //read from the memory byte you have to check and make sure that nothing is writing when you try to read
+uint8_t readMemory(unsigned short address){//read from the memory byte you have to check and make sure that nothing is writing when you try to read
+  // wait for any ongoing EEPROM write operation to complete:
+  // if EEPE is 1 then writing is happning and cannot read
+  while (EECR & (1 << EEPE));
+
+  // set the EEPROM address register (EEAR) to the inputed address
+  EEAR = address;
+
+  // set the EERE (EEPROM Read Enable) bit in the EEPROM control register (EECR)
+  // this alows reading to happen
+  EECR |= (1 << EERE);
+
+  // return the data from the EEPROM data register (EEDR)
+  // the EEDR has the byte we wanted to read from the inputed address
+  return EEDR;
 }
 
-void writeMemory(unsigned short address, uint8_t value){
-  //write a value to the memory but you also have to make sure that nothing else is writing at that time
+void writeMemory(unsigned short address, uint8_t value){//write a value to the memory but you also have to make sure that nothing else is writing at that time
+  // wait for any ongoing EEPROM write operation to complete when EEPE == 0
+  while (EECR & (1 << EEPE));
+
+  // set EEAR to the inputed address
+  EEAR = address;
+
+  // load the data to be written to EEPROM data register (EEDR)
+  EEDR = data;
+
+  // enable the Master Write Enable (EEMPE) bit in the EEPROM cont reg
+  EECR |= (1 << EEMPE);
+
+  // start the write operation by setting the EEPROM Programming Enable (EEPE) bit
+  // *this bit must be set within 4 clock cycles after EEMPE is set*
+  EECR |= (1 << EEPE);
 }
 
 // ---------- ---------- start of the protected functions: ---------- ---------- 
