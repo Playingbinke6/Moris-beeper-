@@ -1,10 +1,11 @@
 
+
 #ifndef message_h
 #define message_h
 
-#include"memory.h"
 
-class Message : public Memory {
+
+class Message {
 public:
 
   Message();
@@ -22,8 +23,10 @@ public:
 
 protected:
 
-  unsigned short stringToPayload(char const* message);
+  unsigned short stringToPayload(char* message);
+  char payloadToChar(bool payloadBit);
   char* payloadToString(unsigned short payload, unsigned char length);
+
 
 private:
 
@@ -43,7 +46,7 @@ private:
     :from(inFrom), to(inTo), payload(inPayload), length(inLength){
 
       this->message = payloadToString(this->payload, this->length);
-      
+
     }
 
   Message::Message(unsigned char* inFrom, unsigned char* inTo, char* inMessage)
@@ -91,16 +94,39 @@ private:
     return payloadToString(this->payload, this->length);
   }
 
-  unsigned short Message::stringToPayload(char const* message){
-
+  unsigned short Message::stringToPayload(char* message){
     
+    for(unsigned short i; i < this->length; i++){
+      
+      if(message[i] == '-'){
+
+        payload |= (1 >> 7 - i);
+
+      }
+      
+    }
+    return payload;
     
   }
 
-  char* Message::payloadToString(unsigned short payload, unsigned char length){
+  char Message::payloadToChar(bool payloadBit){
 
-
+    return (payloadBit ? '-' : '.');
     
+  }
+
+  unsigned char* Message::payloadToString(unsigned short payload, unsigned char length) {
+
+    unsigned char* data;
+
+    for (int i = 0; i < length; i++){
+
+        *(data + i) = payloadToChar((payload >> (length - 1 - i)) & 1);
+
+    }
+
+    return data;
+
   }
 
 #endif
