@@ -115,12 +115,25 @@ Contact Memory::getContact(unsigned short index){//return the contact at the cor
 }
 
 Message Memory::getMessage(unsigned short index){//return the message obj at the index
+  unsigned char* from;//declare the varables needed for the obj
+  unsigned char* to;
+  uint16_t payload;
+  uint8_t length;
 
+  for(int i=0; i<5; i++){//write from
+    from[i] = readMemory(index*13+ 174+ i);
+  }//+5
+  for(int i=0; i<5; i++){//write to
+    to[i] = readMemory(index*13+ 174+ 5+ i);
+  }//+10
+  //write payload
+  payload = (readMemory(index*13+ 174+ 10) << 8) | readMemory(index*13+ 174+ 11);//+12
+  //write length
+  length = readMemory(index*13+ 174+ 12);
 }
 
 bool Memory::saveContact(Contact contact){// save a new contact if there is sapce avalable = = = = = = = =
-  int index = readMemory(20);
-  writeMemory(20, index+1);
+  uint8_t index = readMemory(20);
 
   if(index >= 10)//if the list of contcacts is full return false
     return false;
@@ -129,17 +142,18 @@ bool Memory::saveContact(Contact contact){// save a new contact if there is sapc
   const char* name = contact.retrieveName();
 
   for(int i=0; i<5; i++){//write the UUID
-    writeMemory(index*15+ 21, uint8_t(uuid[i]));
+    writeMemory(index*15+ 21+ i, uint8_t(uuid[i]));
   }
 
   for(int i=0; i<10; i++){//write the NAME
-    writeMemory(index*15+ 26, uint8_t(name[i]));// each char in char array is one byte,
+    writeMemory(index*15+ 26+ i, uint8_t(name[i]));// each char in char array is one byte,
   }//so index through each char and cast to byte, then write that byte
+  
+  //update the index
+  writeMemory(20, index++);
 }
 
 void Memory::saveMessage(Message message){//save a message to the next avalable index, loop if more than 20 messages
-  
-  
   //save the from var
   unsigned char* from = message.getFrom();
   //save the to var
@@ -148,6 +162,24 @@ void Memory::saveMessage(Message message){//save a message to the next avalable 
   uint16_t payload = message.getPayload();
   //save payload length
   uint8_t length = message.getLength();
+  //index for where to write the message (0-19)
+  uint8_t index = readMemory(173) % 20;//% 20 handles looping of the messages
+
+  //index 0 for messeges starts at 174
+  //each message obj is 
+  for(int i=0; i<5; i++){//write from
+    writeMemory(index*13+ 174+ i, uint8_t(from[i]));
+  }//+5
+  for(int i=0; i<5; i++){//write to
+    writeMemory(index*13+ 174+ 5+ i, uint8_t(to[i]));
+  }//+10
+  //write payload
+  writeMemory(index*13+ 174+ 10, uint8_t(payload >> 8));//+11
+  writeMemory(index*13+ 174+ 11, uint8_t(payload));//+12
+  //write length
+  writeMemory(index*13+ 174+ 12, length);
+  //write new index
+  writeMemory(173, index++);
 }
 
 void Memory::saveNodeInformation(Contact contact){
@@ -181,7 +213,7 @@ void writeMemory(unsigned short address, uint8_t value){//write a value to the m
   // load the data to be written to EEPROM data register (EEDR)
   EEDR = data;
 
-  // enable the Master Write Enable (EEMPE) bit in the EEPROM cont reg
+  // enable the Master Write Enable (EEMPE) bit in the EEPROM control register
   EECR |= (1 << EEMPE);
 
   // start the write operation by setting the EEPROM Programming Enable (EEPE) bit
