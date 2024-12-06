@@ -10,6 +10,8 @@
 
 using namespace std;
 
+typedef enum {LEFT, RIGHT, UP, DOWN, SELECT, NONE} Button;
+
 class LcdKeypad : public LiqudCrystal{
 
 public:
@@ -19,8 +21,6 @@ public:
     Button getButtonPress();
 
 private: 
-
-    typedef enum {LEFT, RIGHT, UP, DOWN, SELECT, NONE} Button;
 
     LiquidCrystal screen;
 
