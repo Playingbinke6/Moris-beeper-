@@ -1,13 +1,4 @@
-#ifndef stateRunner_h
-#define stateRunner_h
-
-#include "memory.h"
-#include "contact.h"
-#include "message.h"
-#include "lcdKeypad.h"
-
-
-using namespace std;
+#include "LcdKeypad.h"
 
 State nextState;//when running you will need to set nextState to currentState
                 //before the main switch statement
@@ -49,6 +40,14 @@ void run_MENU(){
             lcd.clear();
 
         }break;
+
+        default:{
+
+            if(xPos == 0){doublePrintOnce("<-  Contacts  ->", 1, 0, NOCLEAR)}
+            if(xPos == 1){doublePrintOnce("<-  Messages  ->", 1, 0, NOCLEAR)}
+            if(xPos == 2){doublePrintOnce("<-  N. Contact  ->", 1, 0, NOCLEAR)}
+            if(xPos == 3){doublePrintOnce("<-  About Me  ->", 1, 0, NOCLEAR)}
+        }
     }
 }
 
@@ -60,13 +59,152 @@ void run_MESSAGE_RECEIVED(){
 
 void run_CONTACTS(){
 
-    //============================
+    static short xPos = 0;
+    static unsigned short contactAddress = 21;
+
+    switch(result){
+
+        
+
+
+        
+        case UP:{
+
+            nextState = MENU;
+            lcd.clear;
+        }break;   
+
+        case RIGHT:{
+
+            if (xPos >= memory.getNumberContacts() - 1){
+
+                contactNumber = 0;//make sure this is added to global
+                xPos = 0;
+
+            }else{
+
+                contactNumber++;
+                xPos++;
+
+            }
+        }break;
+
+        case LEFT:{
+
+            if(xPos == 0){
+
+                xPos = memory.getNumberContacts() -1;
+                counter = xPos;
+
+            }else{
+
+                counter--;
+                xPos--;
+
+            }
+        }break;
+
+        case SELECT:{
+
+            lcd.clear();
+            nextState = MESSAGE_NEW;
+
+        }break;
+
+        default:{
+
+            if(memory.getNumberContacts() == 0){
+
+                if(previousState == MENU){
+
+                    timer = millis();
+
+                }
+
+                lcd.clear();
+                doublePrintOnce("No contacts!", 0, 0, NOCLEAR);
+
+                result = lcd.getButtonPress();
+                while(result != UP && millis() - timer < timeoutWait){
+            
+                    result = lcd.getButtonPress();
+                    doublePrintOnce("MESSAGE FAILED", 0, 0, NOCLEAR);
+
+                }
+
+                lcd.clear();
+                nextState = MENU;
+
+            }else{
+
+                //=====================================
+
+            }
+        }
+    }
         
 }
 
 void run_MESSAGES(){
 
-    //==============================
+    static unsigned short xPos;
+    doublePrintOnce("Messages:", 0, 0, NOCLEAR);
+
+    switch(result){
+
+        case UP:{
+
+            lcd.clear();
+            nextState = MENU;
+
+        }break;
+
+        case RIGHT:{
+
+            if(xPos >= memory.getNumberMessages() -1){
+
+                messageNumber = 0;//add this to global
+                xPos = 0;
+
+            }else{
+
+                messageNumber++;
+                xPos++;
+
+            }
+
+        }break;
+
+        case LEFT{
+
+            if(counter == 0){
+
+                xPos = memory.getNumberMessages() -1;
+                messageNumber = xPos;
+
+            }else{
+
+                xPos--;
+                messageNumber--;
+
+            }
+
+        }break;
+
+        case SELECT{
+
+            lcd.clear();
+            nextState = MESSAGE_OPEN;
+
+        }
+
+        default:{
+
+            //==========================
+
+        }
+
+    }
 
 }
 
@@ -76,9 +214,15 @@ void run_MESSAGE_NEW(){
 
 }
 
-void MESSAGE_OPEN(){
+void run_MESSAGE_OPEN(){
 
     //=================================
+
+}
+
+void run_MESSAGE_SENT(){
+
+    //================================
 
 }
 
@@ -106,9 +250,8 @@ void run_NEW_CONTACT(){
 
     lcd.clear();
 
-    if (/*memObj*/.getNumberContacts() >=10){
+    if (memory.getNumberContacts() >=10){
 
-        static bool getOut = false; //On contacts, On default, might do something?
         nextState = LIST_FULL;
 
     }else{
@@ -184,8 +327,6 @@ void run_ABOUT_ME(){
         }break;
     }
 }
-
-#endif
 
 //at the end of running the state machine
 //include updating previous to current
