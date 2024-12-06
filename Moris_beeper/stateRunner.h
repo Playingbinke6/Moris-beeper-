@@ -16,9 +16,9 @@ void run_MENU(){
     
     static int xPos = 0;
 
-    //"doublePrintOnce"("Menu:", 0, 0, NOCLEAR);
+    //"printOneTime"("Menu:", 0, 0, NOCLEAR);
 
-    switch(result){
+    switch(keyPress){
 
         case RIGHT:
 
@@ -43,10 +43,10 @@ void run_MENU(){
 
         default:{
 
-            if(xPos == 0){doublePrintOnce("<-  Contacts  ->", 1, 0, NOCLEAR)}
-            if(xPos == 1){doublePrintOnce("<-  Messages  ->", 1, 0, NOCLEAR)}
-            if(xPos == 2){doublePrintOnce("<-  N. Contact  ->", 1, 0, NOCLEAR)}
-            if(xPos == 3){doublePrintOnce("<-  About Me  ->", 1, 0, NOCLEAR)}
+            if(xPos == 0){printOneTime("<-  Contacts  ->", 1, 0, NOCLEAR)}
+            if(xPos == 1){printOneTime("<-  Messages  ->", 1, 0, NOCLEAR)}
+            if(xPos == 2){printOneTime("<-  N. Contact  ->", 1, 0, NOCLEAR)}
+            if(xPos == 3){printOneTime("<-  About Me  ->", 1, 0, NOCLEAR)}
         }
     }
 }
@@ -62,7 +62,7 @@ void run_CONTACTS(){
     static short xPos = 0;
     static unsigned short contactAddress = 21;
 
-    switch(result){
+    switch(keyPress){
 
         
 
@@ -122,13 +122,13 @@ void run_CONTACTS(){
                 }
 
                 lcd.clear();
-                doublePrintOnce("No contacts!", 0, 0, NOCLEAR);
+                printOneTime("No contacts!", 0, 0, NOCLEAR);
 
-                result = lcd.getButtonPress();
-                while(result != UP && millis() - timer < timeoutWait){
+                keyPress = lcd.getButtonPress();
+                while(keyPress != UP && millis() - timer < timeoutWait){
             
-                    result = lcd.getButtonPress();
-                    doublePrintOnce("MESSAGE FAILED", 0, 0, NOCLEAR);
+                    keyPress = lcd.getButtonPress();
+                    printOneTime("MESSAGE FAILED", 0, 0, NOCLEAR);
 
                 }
 
@@ -148,9 +148,9 @@ void run_CONTACTS(){
 void run_MESSAGES(){
 
     static unsigned short xPos;
-    doublePrintOnce("Messages:", 0, 0, NOCLEAR);
+    printOneTime("Messages:", 0, 0, NOCLEAR);
 
-    switch(result){
+    switch(keyPress){
 
         case UP:{
 
@@ -232,12 +232,12 @@ void run_MESSAGE_FAILED(){
 
         timer = millis();
 
-        result = lcd.getButtonPress();
+        keyPress = lcd.getButtonPress();
 
-        while(result != UP && millis() - timer < timeoutWait){
+        while(keyPress != UP && millis() - timer < timeoutWait){
             
-            result = lcd.getButtonPress();
-            doublePrintOnce("MESSAGE FAILED", 0, 0, NOCLEAR);
+            keyPress = lcd.getButtonPress();
+            printOneTime("MESSAGE FAILED", 0, 0, NOCLEAR);
 
         }
 
@@ -285,12 +285,12 @@ void run_LIST_FULL(){
 
         timer = millis();
 
-        result = lcd.getButtonPress;
-        while(result != UP && millis() - timer < timeoutWait){
+        keyPress = lcd.getButtonPress;
+        while(keyPress != UP && millis() - timer < timeoutWait){
         
-            result = lcd.getButtonPress;
-            doublePrintOnce("Contact List ", 0, 0, NOCLEAR);
-            doublePrintOnce("is full!", 1, 0, NOCLEAR);
+            keyPress = lcd.getButtonPress;
+            printOneTime("Contact List ", 0, 0, NOCLEAR);
+            printOneTime("is full!", 1, 0, NOCLEAR);
 
         }
         /*curNameSoFar = "a          ";
@@ -310,7 +310,7 @@ void run_ABOUT_ME(){
 
     }
 
-    switch(result){
+    switch(keyPress){
 
         case UP:{
 
