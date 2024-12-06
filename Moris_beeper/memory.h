@@ -52,12 +52,8 @@ private:
 };
 
 
-// Memory::Memory(){
-
-// }
-// Memory::Memory(Contact node){
-
-// }
+ Memory::Memory(){ }
+// Memory::Memory(Contact node){ }
 
 unsigned char* Memory::getMyUUID(){//return the UUID of myself
   unsigned char* UUID;
